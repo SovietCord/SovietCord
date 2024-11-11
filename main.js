@@ -16,7 +16,7 @@ app.get('*', async (req, res) => {
         let searchTerm;
         let mode;
         let media = "none";
-        if(url.charAt(1) === 'm') {
+        if(url.charAt(1) === 'm' || url.charAt(1) === 'c') {
             searchTerm = (url.split('/'))[3];
             mode = (url.split('/'))[2];
             media = (url.split('/'))[1];
@@ -61,7 +61,7 @@ app.get('*', async (req, res) => {
         let gifBuffer;
         let type = 'image/gif';
         
-        if(media === "none") {
+        if(media === "none" || media === "cdn") {
             switch(mode) {
                 case 'viditw':
                     gifBuffer = await deepFry(gifURL);
