@@ -1,13 +1,13 @@
 {
-  "name": "sovietcord",
-  "version": "1.0.0",
+  "name": "soviet-server",
+  "version": "0.0.1",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "@ClaraCrazy, @hlelo101",
   "license": "ISC",
   "description": "",
   "dependencies": {
