@@ -5,17 +5,24 @@ const { deepFry, sovietize, hub } = require('./effects.js');
 const path = require('path');
 const fs = require('fs');
 
-app.get('/*', async (req, res) => {
+app.get('*', async (req, res) => {
     try {
+        const subdomains = req.subdomains.join('.');
+        if (subdomains) {
+            console.log(`Subdomain detected: ${subdomains}`);
+        } else {
+            console.log('No subdomain detected.');
+        }
+
         // Get the GIF's URL
         const url = req.params[0];
 
         // Browser is just searching for the icon, we don't care
-        if (url === 'favicon.ico') return;
+        if (url === '/favicon.ico') return;
 
         // Get the search term
-        const searchTerm = (url.split('/'))[1];
-        const mode = (url.split('/'))[0];
+        const searchTerm = (url.split('/'))[2];
+        const mode = (url.split('/'))[1];
         if (searchTerm === undefined) {
             res.sendFile(path.join(__dirname, 'media', 'error.gif'));
             return;
@@ -23,7 +30,7 @@ app.get('/*', async (req, res) => {
 
         let gifURL;
 
-        if(mode[0] === 'v') {
+        if(mode.charAt(0) === 'v') {
             const toSearch = `https://tenor.googleapis.com/v2/search?q=${searchTerm}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`;
             console.log('Search term:', searchTerm, '\nURL:', toSearch);
 
