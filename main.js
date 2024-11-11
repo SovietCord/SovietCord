@@ -7,13 +7,6 @@ const fs = require('fs');
 
 app.get('*', async (req, res) => {
     try {
-        const subdomains = req.subdomains.join('.');
-        if (subdomains) {
-            console.log(`Subdomain detected: ${subdomains}`);
-        } else {
-            console.log('No subdomain detected.');
-        }
-
         // Get the GIF's URL
         const url = req.params[0];
 

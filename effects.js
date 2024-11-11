@@ -65,9 +65,12 @@ async function hub(url) {
     try {
         const gif = await getGif(url);
 
+        // using titlePosSize[1] does nothing for some
+        // fucking reason and i don't want to know why,
+        // it looks fine without it
+        let titlePosSize = [30, 130, 60];
+        let textPosSize = [30, 100, 20];
         // Handle if gif is smol
-        let titlePosSize = [30, 100, 60];
-        let textPosSize = [30, 150, 20];
         await new Promise((resolve, reject) => {
             gm(gif).identify((err, data) => {
                 if (err) {
@@ -95,7 +98,7 @@ async function hub(url) {
             .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), textPosSize[2])
             .fill('#ffffff')
             .drawText(textPosSize[0], textPosSize[1], 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n[command list here]')
-            
+
             .toBuffer('GIF', (err, buffer) => {
                 if (err) {
                     reject(err);
