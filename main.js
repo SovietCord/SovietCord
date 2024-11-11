@@ -2,47 +2,8 @@ const express = require('express');
 const app = express();
 const path = require('path');
 require('dotenv').config();
-const gm = require('gm').subClass({ imageMagick: true });
 const fs = require('fs');
-
-async function deepFry(url) {
-    try {
-        // Get the GIF
-        const response = await fetch(url);
-
-        if(!response.ok) throw new Error('Failed to fetch GIF');
-
-        // File stuff
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const tempPath = path.join(__dirname, 'temp.gif');
-        fs.writeFileSync(tempPath, buffer);
-
-        // Deepfry
-        await new Promise((resolve, reject) => {
-            gm(tempPath)
-                .modulate(120, 200, 100)
-                .contrast(10)
-                .noise('laplacian')
-                .quality(50)
-                .write(path.join(__dirname, 'output.gif'), (err) => {
-                    if (err) {
-                        console.error('Error processing GIF:', err);
-                        reject(err);
-                    } else {
-                        console.log('GIF processed and saved as output.gif');
-                        resolve();
-                    }
-                });
-        });
-
-        // Clean up
-        fs.unlinkSync(tempPath);
-    } catch(error) {
-        console.error('An error occured while adding a caption the the gif: ', error);
-    }
-}
+const { deepFry, sovietize } = require('./effects.js');
 
 app.get('/*', async (req, res) => {
     try {
@@ -54,6 +15,7 @@ app.get('/*', async (req, res) => {
 
         // Get the search term
         const searchTerm = (url.split('/'))[1];
+        const mode = (url.split('/'))[0];
         if (searchTerm === undefined) {
             res.sendFile(path.join(__dirname, 'error.gif'));
             return;
@@ -79,8 +41,12 @@ app.get('/*', async (req, res) => {
         const gifURL = data.results[0].media_formats.gif.url;
         console.log('GIF URL:', gifURL);
 
-        // Deepfry the gif
-        await deepFry(gifURL);
+        // Do stuff to the gif
+        if(mode === 'viditw' || mode === 'attachmditnts') {
+            await deepFry(gifURL);
+        } else {
+            await sovietize(gifURL);
+        }
 
         // Send the output
         res.sendFile(path.join(__dirname, 'output.gif'), (err) => {
