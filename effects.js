@@ -1,10 +1,9 @@
-const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 const gm = require('gm').subClass({ imageMagick: true });
+const path = require('path');
 
 // Takes in the URL of the GIF, writes it to a temporary file, 
-// returns the path of that file
+// returns the buffer of that file
 async function getGif(url) {
     // Get the GIF
     const response = await fetch(url, {
@@ -67,6 +66,13 @@ async function sovietize(url) {
 
 async function hub(url) {
     try {
+        // Here are the available commands
+        const commands = 's/x/s\n'
+        + 's/x/d\n'
+        + 'To revert:\n'
+        + 'If you entered s/x/s, enter s/syph/xyph\n'
+        + 'If you entered s/x/d, enter s/dyph/xyph';
+        
         const gif = await getGif(url);
 
         // using titlePosSize[1] does nothing for some
@@ -118,5 +124,72 @@ async function hub(url) {
     }
 }
 
+// the same as hub, except for welcome
+async function welcome(url, tenor) {
+    try {
+        const gif = await getGif(url);
+        let titlePosSize = [30, 130, 60];
+        let textPosSize = [30, 100, 20];
+        let userSend;
+        if(tenor) {
+            userSend = 's/view/txyph'
+        } else {
+            userSend = 's/attachment/dxyph'
+        }
+        // Handle if gif is smol
+        await new Promise((resolve, reject) => {
+            gm(gif).identify((err, data) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (data.size.width < 400) {
+                        titlePosSize = [10, 10, 34];
+                        textPosSize = [10, 60, 15];
+                    }
+                    resolve(); 
+                }
+            });
+        });        
+    
+        return new Promise((resolve, reject) => {
+            gm(gif)
+            .coalesce()
+            .out('-fill', 'rgba(255, 0, 0, 0.8)')
+            .out('-colorize', '100,0,0')
 
-module.exports = { deepFry, sovietize, hub };
+            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), titlePosSize[2])
+            .fill('black')
+            .drawText(titlePosSize[0] - 1, titlePosSize[2] - 1, 'Welcome!')
+            .drawText(titlePosSize[0] + 1, titlePosSize[2] - 1, 'Welcome!')
+            .drawText(titlePosSize[0] - 1, titlePosSize[2] + 1, 'Welcome!')
+            .drawText(titlePosSize[0] + 1, titlePosSize[2] + 1, 'Welcome!')
+            .fill('#d1c300')
+            .drawText(titlePosSize[0], titlePosSize[2], 'Welcome!')
+
+            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), textPosSize[2])
+            .fill('black')
+            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'To get started, enter "' + userSend + '".')
+            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'To get started, enter "' + userSend + '".')
+            .drawText(textPosSize[0] - 1, textPosSize[1] + 1, 'To get started, enter "' + userSend + '".')
+            .drawText(textPosSize[0] + 1, textPosSize[1] + 1, 'To get started, enter "' + userSend + '".')
+            .fill('#d1c300')
+            .drawText(textPosSize[0], textPosSize[1], 'To get started, enter "' + userSend + '".')
+
+            .toBuffer('GIF', (err, buffer) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(buffer);
+                }
+            });
+        
+        });
+    } catch (err) {
+        console.error('Error in hub function:', err);
+        throw err;
+    }
+}
+
+
+
+module.exports = { deepFry, sovietize, hub, welcome };
