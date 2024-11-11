@@ -55,7 +55,7 @@ app.get('/*', async (req, res) => {
         // Get the search term
         const searchTerm = (url.split('/'))[1];
         if (searchTerm === undefined) {
-            res.sendFile(path.join(__dirname, 'car.gif'));
+            res.sendFile(path.join(__dirname, 'error.gif'));
             return;
         }
 
