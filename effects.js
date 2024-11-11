@@ -53,14 +53,10 @@ async function deepFry(url) {
 
 async function sovietize(url) {
     try {
-
         const tempPath = await getAndWriteTempFiles(url);
 
         // Sovietize
         await new Promise((resolve, reject) => {
-            /* 
-
-            */
             gm(tempPath)
                 .coalesce()
                 .out('-fill', 'rgba(255, 0, 0, 0.6)')
