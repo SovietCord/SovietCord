@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 require('dotenv').config();
-const fs = require('fs');
 const { deepFry, sovietize } = require('./effects.js');
 
 app.get('/*', async (req, res) => {
@@ -42,23 +41,16 @@ app.get('/*', async (req, res) => {
         console.log('GIF URL:', gifURL);
 
         // Do stuff to the gif
+        let gifBuffer;
         if(mode === 'viditw' || mode === 'attachmditnts') {
-            await deepFry(gifURL);
+            gifBuffer = await deepFry(gifURL);
         } else {
-            await sovietize(gifURL);
+            gifBuffer = await sovietize(gifURL);
         }
 
         // Send the output
-        res.sendFile(path.join(__dirname, 'output.gif'), (err) => {
-            if (err) {
-                console.error('Error sending the file:', err);
-                res.status(500).send('Error sending the processed GIF');
-            }
-
-            // Clean up after sending the response
-            fs.unlinkSync(path.join(__dirname, 'output.gif'));
-        });
-
+        res.setHeader('Content-Type', 'image/gif');
+        res.send(gifBuffer);
     } catch (error) {
         // Error :(
         console.error('Error in processing:', error);
