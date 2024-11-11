@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
-const path = require('path');
 require('dotenv').config();
-const { deepFry, sovietize } = require('./effects.js');
+const { deepFry, sovietize, hub } = require('./effects.js');
+const path = require('path');
+const fs = require('fs');
 
 app.get('/*', async (req, res) => {
     try {
@@ -16,40 +17,58 @@ app.get('/*', async (req, res) => {
         const searchTerm = (url.split('/'))[1];
         const mode = (url.split('/'))[0];
         if (searchTerm === undefined) {
-            res.sendFile(path.join(__dirname, 'error.gif'));
+            res.sendFile(path.join(__dirname, 'media', 'error.gif'));
             return;
         }
 
-        const toSearch = `https://tenor.googleapis.com/v2/search?q=${searchTerm}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`;
-        console.log('Search term:', searchTerm, '\nURL:', toSearch);
+        let gifURL;
 
-        // Fetch the GIF
-        const response = await fetch(toSearch, {
-            headers: {
-                'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
+        if(mode[0] === 'v') {
+            const toSearch = `https://tenor.googleapis.com/v2/search?q=${searchTerm}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`;
+            console.log('Search term:', searchTerm, '\nURL:', toSearch);
+
+            // Fetch the GIF
+            const response = await fetch(toSearch, {
+                headers: {
+                    'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
+                }
+            });
+
+            const data = await response.json();
+
+            if (!(data.results && data.results.length > 0)) {
+                res.status(404).send('No GIFs found for the search term');
+                return;
             }
-        });
 
-        const data = await response.json();
-
-        if (!(data.results && data.results.length > 0)) {
-            res.status(404).send('No GIFs found for the search term');
-            return;
+            gifURL = data.results[0].media_formats.gif.url;
+        } else {
+            console.log("Original URL: ", req.originalUrl);
+            gifURL = 'https://cdn.discordapp.com/attachments/' + req.originalUrl.split('/').slice(2).join('/');
         }
 
-        const gifURL = data.results[0].media_formats.gif.url;
         console.log('GIF URL:', gifURL);
 
         // Do stuff to the gif
         let gifBuffer;
-        if(mode === 'viditw' || mode === 'attachmditnts') {
-            gifBuffer = await deepFry(gifURL);
-        } else {
-            gifBuffer = await sovietize(gifURL);
+        let type = 'image/gif';
+
+        switch(mode) {
+            case 'viditw':
+                gifBuffer = await deepFry(gifURL);
+                break;
+            case 'attachmditnts':
+                gifBuffer = await deepFry(gifURL);
+                break;
+            case 'vxylophoneew':
+                gifBuffer = await hub(gifURL);
+                break;
+            default:
+                gifBuffer = await sovietize(gifURL);
         }
 
         // Send the output
-        res.setHeader('Content-Type', 'image/gif');
+        res.setHeader('Content-Type', type);
         res.send(gifBuffer);
     } catch (error) {
         // Error :(
