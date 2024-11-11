@@ -52,7 +52,7 @@ app.get('*', async (req, res) => {
             gifURL = data.results[0].media_formats.gif.url;
         } else {
             console.log("Original URL: ", req.originalUrl);
-            gifURL = 'https://cdn.discordapp.com/attachments/' + req.originalUrl.split('/').slice(2).join('/');
+            gifURL = 'https://cdn.discordapp.com/attachments/' + req.originalUrl.split('/').slice(3).join('/');
         }
 
         console.log('GIF URL:', gifURL);
