@@ -3,7 +3,6 @@ const app = express();
 require('dotenv').config();
 const { deepFry, sovietize, hub } = require('./effects.js');
 const path = require('path');
-const fs = require('fs');
 
 app.get('*', async (req, res) => {
     try {
@@ -14,8 +13,17 @@ app.get('*', async (req, res) => {
         if (url === '/favicon.ico') return;
 
         // Get the search term
-        const searchTerm = (url.split('/'))[2];
-        const mode = (url.split('/'))[1];
+        let searchTerm;
+        let mode;
+        let media = "none";
+        if(url.charAt(1) === 'm') {
+            searchTerm = (url.split('/'))[3];
+            mode = (url.split('/'))[2];
+            media = (url.split('/'))[1];
+        } else {
+            searchTerm = (url.split('/'))[2];
+            mode = (url.split('/'))[1];
+        }
         if (searchTerm === undefined) {
             res.sendFile(path.join(__dirname, 'media', 'error.gif'));
             return;
@@ -52,19 +60,29 @@ app.get('*', async (req, res) => {
         // Do stuff to the gif
         let gifBuffer;
         let type = 'image/gif';
-
-        switch(mode) {
-            case 'viditw':
-                gifBuffer = await deepFry(gifURL);
-                break;
-            case 'attachmditnts':
-                gifBuffer = await deepFry(gifURL);
-                break;
-            case 'vxylophoneew':
-                gifBuffer = await hub(gifURL);
-                break;
-            default:
-                gifBuffer = await sovietize(gifURL);
+        
+        if(media === "none") {
+            switch(mode) {
+                case 'viditw':
+                    gifBuffer = await deepFry(gifURL);
+                    break;
+                case 'attachmditnts':
+                    gifBuffer = await deepFry(gifURL);
+                    break;
+                case 'vxylophoneew':
+                    gifBuffer = await hub(gifURL);
+                    break;
+                default:
+                    gifBuffer = await sovietize(gifURL);
+            }
+        } else {
+            switch(media) {
+                case 'mditdia':
+                    gifBuffer = await deepFry(gifURL);
+                    break;
+                default:
+                    gifBuffer = await hub(gifURL);
+            }
         }
 
         // Send the output

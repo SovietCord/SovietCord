@@ -7,7 +7,11 @@ const gm = require('gm').subClass({ imageMagick: true });
 // returns the path of that file
 async function getGif(url) {
     // Get the GIF
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {
+            'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
+        }
+    });
 
     if (!response.ok) throw new Error('Failed to fetch GIF');
 
