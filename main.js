@@ -76,11 +76,12 @@ app.get('*', async (req, res) => {
         }
 
         // Send the output
+        res.setHeader('User-Agent', 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)');
         res.setHeader('Content-Type', 'image/gif');
         res.send(gifBuffer);
     } catch (error) {
         // Error :(
-        console.error('Error in processing:', error);
+        console.error('Error in processing:\n', error);
         sendError(res);
     }
 });
