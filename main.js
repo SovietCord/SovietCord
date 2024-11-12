@@ -54,9 +54,25 @@ app.get('*', async (req, res) => {
         let gifBuffer;
         let skipCheck = false;
         // Send welcome message if needed
-        if(req.params[0] === '/') {
+        if(req.params[0] === '/' || req.params[0] === '/view' || req.params[0] === '/attachments') {
             skipCheck = true;
             gifBuffer = await welcome(gifURL, tenor ? true : false);
+        }
+
+        if(!skipCheck) {
+            switch(req.params[0].slice(1)) {
+                case 'sovietize':
+                    gifBuffer = await sovietize(gifURL);
+                    break;
+                case 'deepfry':
+                    gifBuffer = await deepFry(gifURL);
+                    break;
+                case 'menu':
+                    gifBuffer = await hub(gifURL);
+                    break;
+                default:
+                    gifBuffer = await fs.readFile(path.join(__dirname, 'media', 'error.gif'));
+            }
         }
 
         // Send the output

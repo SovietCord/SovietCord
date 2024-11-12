@@ -67,11 +67,11 @@ async function sovietize(url) {
 async function hub(url) {
     try {
         // Here are the available commands
-        const commands = 's/x/s\n'
-        + 's/x/d\n'
+        const commands = 's/menu/deepfry\n'
+        + 's/menu/sovietize\n\n'
         + 'To revert:\n'
-        + 'If you entered s/x/s, enter s/syph/xyph\n'
-        + 'If you entered s/x/d, enter s/dyph/xyph';
+        + 'If you entered s/menu/deepfry,\n enter s/deepfry/menu\n'
+        + 'If you entered s/menu/sovietize,\n enter s/sovietize/menu';
         
         const gif = await getGif(url);
 
@@ -102,12 +102,22 @@ async function hub(url) {
             .out('-colorize', '100,0,0')
 
             .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), titlePosSize[2])
+            .fill('black')
+            .drawText(titlePosSize[0] + 1, titlePosSize[2] + 1, 'Welcome!')
+            .drawText(titlePosSize[0] - 1, titlePosSize[2] + 1, 'Welcome!')
+            .drawText(titlePosSize[0] + 1, titlePosSize[2] - 1, 'Welcome!')
+            .drawText(titlePosSize[0] - 1, titlePosSize[2] - 1, 'Welcome!')
             .fill('#ffffff')
             .drawText(titlePosSize[0], titlePosSize[2], 'Welcome!')
 
             .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), textPosSize[2])
+            .fill('black')
+            .drawText(textPosSize[0] + 1, textPosSize[1] + 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
+            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
+            .drawText(textPosSize[0] + 1, textPosSize[1] - 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
+            .drawText(textPosSize[0] - 1, textPosSize[1] + 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
             .fill('#ffffff')
-            .drawText(textPosSize[0], textPosSize[1], 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n[command list here]')
+            .drawText(textPosSize[0], textPosSize[1], 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
 
             .toBuffer('GIF', (err, buffer) => {
                 if (err) {
@@ -134,7 +144,7 @@ async function welcome(url, tenor) {
         if(tenor) {
             userSend = 's/view/menu'
         } else {
-            userSend = 's/attachment/menu'
+            userSend = 's/attachments/menu'
         }
         // Handle if gif is smol
         await new Promise((resolve, reject) => {
