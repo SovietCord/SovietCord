@@ -132,9 +132,9 @@ async function welcome(url, tenor) {
         let textPosSize = [30, 100, 20];
         let userSend;
         if(tenor) {
-            userSend = 's/view/txyph'
+            userSend = 's/view/menu'
         } else {
-            userSend = 's/attachment/dxyph'
+            userSend = 's/attachment/menu'
         }
         // Handle if gif is smol
         await new Promise((resolve, reject) => {

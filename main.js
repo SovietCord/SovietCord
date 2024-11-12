@@ -19,19 +19,19 @@ async function sendError(res) {
 
 app.get('*', async (req, res) => {
     try {
-        // Get the GIF's URL and some parameters
-        const url = req.params[0];
-        const firstArg = (url.split('/'))[1];
-        const secondArg = (url.split('/'))[2];
-        if(firstArg === undefined || secondArg === undefined) return await sendError(res);
+        // Get the source from the headers
+        const source = req.headers['source'];
 
+        // Check the header
+        if(source === undefined) return sendError(res);
+
+        // Get the GIF URL
         let gifURL;
-        if(firstArg === 'attachments' || firstArg.charAt(0) === 'd') {
-            // Discord URL
-            gifURL = 'https://cdn.discordapp.com/attachments/' + req.originalUrl.split('/').slice(2).join('/');
-        } else {
-            // Assuming Tenor URL
-            const response = await fetch(`https://tenor.googleapis.com/v2/search?q=${secondArg}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`, {
+        let tenor; // true if from tenor, false otherwise
+        if(source.charAt(8) === 't') {
+            // Tenor URL
+            tenor = true;
+            const response = await fetch(`https://tenor.googleapis.com/v2/search?q=${source.split('/')[4]}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`, {
                 headers: {
                     'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
                 }
@@ -41,35 +41,22 @@ app.get('*', async (req, res) => {
 
             if (!(data.results && data.results.length > 0)) {
                 // No gifs found
-                await sendError(res);
-                return;
+                return await sendError(res);
             }
 
             gifURL = data.results[0].media_formats.gif.url;
+        } else {
+            // Assuming Discord URL
+            tenor = false;
+            gifURL = source;
         }
 
         let gifBuffer;
         let skipCheck = false;
-        // Check if the link has been modified
-        if(firstArg === 'view') {
-            gifBuffer = await welcome(gifURL, true);
+        // Send welcome message if needed
+        if(req.params[0] === '/') {
             skipCheck = true;
-        } else if(firstArg === 'attachments') {
-            gifBuffer = await welcome(gifURL, false);
-            skipCheck = true;
-        }
-
-        if(!skipCheck) {
-            switch(firstArg.slice(1)) {
-                case 'syph':
-                    gifBuffer = await sovietize(gifURL);
-                    break;
-                case 'dyph':
-                    gifBuffer = await deepFry(gifURL);
-                    break;
-                default:
-                    gifBuffer = await hub(gifURL);
-            }
+            gifBuffer = await welcome(gifURL, tenor ? true : false);
         }
 
         // Send the output
