@@ -23,19 +23,31 @@ async function getGif(url) {
 
 async function deepFry(url) {
     try {
+        let height;
         const gifBuffer = await getGif(url);
 
         // Deepfry the GIF
         return new Promise((resolve, reject) => {
             gm(gifBuffer)
+            .size((err, size) => {
+                height = err ?  '10' : size.height;
+                if(err) console.log(err);
+
+                gm(gifBuffer)
                 .modulate(120, 200, 100)
                 .contrast(10)
                 .noise('laplacian')
                 .quality(50)
+
+                .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), 10)
+                .fill('black')
+                .drawText(10, height - 10, 'Enter "s/deepfry/menu" to go back to the hub')
+
                 .toBuffer('GIF', (err, buffer) => {
                     if (err) reject(err);
                     else resolve(buffer);
                 });
+            });
         });
     } catch (error) {
         console.error('An error occurred while deep frying the gif:', error);
@@ -45,18 +57,30 @@ async function deepFry(url) {
 
 async function sovietize(url) {
     try {
+        let height;
+
         const gifBuffer = await getGif(url);
 
         // Sovietize the GIF
         return new Promise((resolve, reject) => {
             gm(gifBuffer)
+            .size((err, size) => {
+                height = err ?  '10' : size.height;
+                if(err) console.log(err);
+
+                gm(gifBuffer)
                 .coalesce()
                 .out('-fill', 'rgba(255, 0, 0, 0.6)')
                 .out('-colorize', '100,0,0')
+                .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), 10)
+                .fill('black')
+                .drawText(10, height - 10, 'Enter "s/sovietize/menu" to go back to the hub')
+                
                 .toBuffer('GIF', (err, buffer) => {
                     if (err) reject(err);
                     else resolve(buffer);
                 });
+            });
         });
     } catch (error) {
         console.error('An error occurred while sovietizing the gif:', error);
@@ -69,9 +93,6 @@ async function hub(url) {
         // Here are the available commands
         const commands = 's/menu/deepfry\n'
         + 's/menu/sovietize\n\n'
-        + 'To revert:\n'
-        + 'If you entered s/menu/deepfry,\n enter s/deepfry/menu\n'
-        + 'If you entered s/menu/sovietize,\n enter s/sovietize/menu';
         
         const gif = await getGif(url);
 
@@ -141,11 +162,7 @@ async function welcome(url, tenor) {
         let titlePosSize = [30, 130, 60];
         let textPosSize = [30, 100, 20];
         let userSend;
-        if(tenor) {
-            userSend = 's/view/menu'
-        } else {
-            userSend = 's/attachments/menu'
-        }
+        userSend = (tenor) ? 's/view/menu' : 's/attachments/menu';
         // Handle if gif is smol
         await new Promise((resolve, reject) => {
             gm(gif).identify((err, data) => {
@@ -156,7 +173,7 @@ async function welcome(url, tenor) {
                         titlePosSize = [10, 10, 34];
                         textPosSize = [10, 60, 15];
                     }
-                    resolve(); 
+                    resolve();
                 }
             });
         });        
