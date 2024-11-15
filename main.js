@@ -43,8 +43,6 @@ app.get('*', async (req, res) => {
             const match = html.match(/<meta class="dynamic" name="twitter:image" content="https:\/\/(?:c|media1)\.tenor\.com\/([^"]*)">/);
             if (!match || !match[1]) {
                 throw new Error("Image URL not found in the HTML.");
-            } else {
-                console.log("Found!", match[1]);
             }
     
             // Construct the direct image URL
