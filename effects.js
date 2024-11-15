@@ -2,6 +2,46 @@ require('dotenv').config();
 const gm = require('gm').subClass({ imageMagick: true });
 const path = require('path');
 
+// Some functions to simplify the code and avoid repetitions
+async function drawSmallText(buffer, text) {
+    let height;
+    
+    return new Promise((resolve, reject) => {
+        gm(buffer)
+        .size((err, size) => {
+            height = err ?  '10' : size.height;
+            if(err) console.log(err);
+    
+            gm(buffer)
+            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), 10)
+            .fill('black')
+            .drawText(10, height - 10, text)
+            .toBuffer('GIF', (err, buffer) => {
+                if(err) reject(err);
+                else resolve(buffer);
+            });
+        });
+    });
+}
+
+async function drawTextWithBorder(buffer, text, textColor, borderColor, size, x, y) {
+    return new Promise((resolve, reject) => {
+        gm(buffer)
+        .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), size)
+        .fill(borderColor)
+        .drawText(x + 1, y + 1, text)
+        .drawText(x - 1, y + 1, text)
+        .drawText(x + 1, y - 1, text)
+        .drawText(x - 1, y - 1, text)
+        .fill(textColor)
+        .drawText(x, y, text)
+        .toBuffer('GIF', (err, buffer) => {
+            if(err) reject(err);
+            else resolve(buffer);
+        });
+    });
+}
+
 // Takes in the URL of the GIF, writes it to a temporary file, 
 // returns the buffer of that file
 async function getGif(url) {
@@ -29,24 +69,16 @@ async function deepFry(url) {
         // Deepfry the GIF
         return new Promise((resolve, reject) => {
             gm(gifBuffer)
-            .size((err, size) => {
-                height = err ?  '10' : size.height;
-                if(err) console.log(err);
+            .modulate(120, 200, 100)
+            .contrast(10)
+            .noise('laplacian')
+            .quality(50)
 
-                gm(gifBuffer)
-                .modulate(120, 200, 100)
-                .contrast(10)
-                .noise('laplacian')
-                .quality(50)
-
-                .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), 10)
-                .fill('black')
-                .drawText(10, height - 10, 'Enter "s/deepfry/menu" to go back to the hub')
-
-                .toBuffer('GIF', (err, buffer) => {
-                    if (err) reject(err);
-                    else resolve(buffer);
-                });
+            .toBuffer('GIF', (err, buffer) => {
+                if (err) reject(err);
+                else {
+                    resolve(drawSmallText(buffer, 'Enter "s/deepfry/menu" to go back to the hub'));
+                }
             });
         });
     } catch (error) {
@@ -64,22 +96,13 @@ async function sovietize(url) {
         // Sovietize the GIF
         return new Promise((resolve, reject) => {
             gm(gifBuffer)
-            .size((err, size) => {
-                height = err ?  '10' : size.height;
-                if(err) console.log(err);
-
-                gm(gifBuffer)
-                .coalesce()
-                .out('-fill', 'rgba(255, 0, 0, 0.6)')
-                .out('-colorize', '100,0,0')
-                .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), 10)
-                .fill('black')
-                .drawText(10, height - 10, 'Enter "s/sovietize/menu" to go back to the hub')
-                
-                .toBuffer('GIF', (err, buffer) => {
-                    if (err) reject(err);
-                    else resolve(buffer);
-                });
+            .coalesce()
+            .out('-fill', 'rgba(255, 0, 0, 0.6)')
+            .out('-colorize', '100,0,0')
+            
+            .toBuffer('GIF', (err, buffer) => {
+                if (err) reject(err);
+                else resolve(drawSmallText(buffer, 'Enter "s/sovietize/menu" to go back to the hub'));
             });
         });
     } catch (error) {
@@ -96,10 +119,9 @@ async function hub(url) {
         
         const gif = await getGif(url);
 
-        // using titlePosSize[1] does nothing for some
-        // fucking reason and i don't want to know why,
-        // it looks fine without it
-        let titlePosSize = [30, 130, 60];
+        // i found why it wasn't working and i feel very stupid now
+        // (no you won't look at the last commit to see what was wrong)
+        let titlePosSize = [30, 60, 60];
         let textPosSize = [30, 100, 20];
         // Handle if gif is smol
         await new Promise((resolve, reject) => {
@@ -108,7 +130,7 @@ async function hub(url) {
                     reject(err);
                 } else {
                     if (data.size.width < 400) {
-                        titlePosSize = [10, 10, 34];
+                        titlePosSize = [10, 40, 34];
                         textPosSize = [10, 60, 15];
                     }
                     resolve(); 
@@ -116,39 +138,24 @@ async function hub(url) {
             });
         });        
     
-        return new Promise((resolve, reject) => {
+        const initialBuffer = await new Promise((resolve, reject) => {
             gm(gif)
             .coalesce()
             .out('-fill', 'rgba(0, 0, 0, 0.8)')
             .out('-colorize', '100,0,0')
 
-            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), titlePosSize[2])
-            .fill('black')
-            .drawText(titlePosSize[0] + 1, titlePosSize[2] + 1, 'Welcome!')
-            .drawText(titlePosSize[0] - 1, titlePosSize[2] + 1, 'Welcome!')
-            .drawText(titlePosSize[0] + 1, titlePosSize[2] - 1, 'Welcome!')
-            .drawText(titlePosSize[0] - 1, titlePosSize[2] - 1, 'Welcome!')
-            .fill('#ffffff')
-            .drawText(titlePosSize[0], titlePosSize[2], 'Welcome!')
-
-            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), textPosSize[2])
-            .fill('black')
-            .drawText(textPosSize[0] + 1, textPosSize[1] + 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
-            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
-            .drawText(textPosSize[0] + 1, textPosSize[1] - 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
-            .drawText(textPosSize[0] - 1, textPosSize[1] + 1, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
-            .fill('#ffffff')
-            .drawText(textPosSize[0], textPosSize[1], 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands)
-
             .toBuffer('GIF', (err, buffer) => {
-                if (err) {
-                    reject(err);
-                } else {
+                if (err) reject(err);
+                else {
                     resolve(buffer);
                 }
             });
-        
         });
+
+        const bufferPt1 = await drawTextWithBorder(initialBuffer, 'It seems like you found Sovietcord\'s hub.\nHere\'s a list of every commands:\n' + commands,
+            'white', 'black', textPosSize[2], textPosSize[0], textPosSize[1])
+        return await drawTextWithBorder(bufferPt1, 'Welcome!',
+                        'white', 'black', titlePosSize[2], titlePosSize[0], titlePosSize[1]);
     } catch (err) {
         console.error('Error in hub function:', err);
         throw err;
@@ -159,7 +166,7 @@ async function hub(url) {
 async function welcome(url, tenor) {
     try {
         const gif = await getGif(url);
-        let titlePosSize = [30, 130, 60];
+        let titlePosSize = [30, 60, 60];
         let textPosSize = [30, 100, 20];
         let userSend;
         userSend = (tenor) ? 's/view/menu' : 's/attachments/menu';
@@ -170,7 +177,7 @@ async function welcome(url, tenor) {
                     reject(err);
                 } else {
                     if (data.size.width < 400) {
-                        titlePosSize = [10, 10, 34];
+                        titlePosSize = [10, 40, 34];
                         textPosSize = [10, 60, 15];
                     }
                     resolve();
@@ -178,29 +185,11 @@ async function welcome(url, tenor) {
             });
         });        
     
-        return new Promise((resolve, reject) => {
+        const initialBuffer = await new Promise((resolve, reject) => {
             gm(gif)
             .coalesce()
             .out('-fill', 'rgba(255, 0, 0, 0.8)')
             .out('-colorize', '100,0,0')
-
-            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), titlePosSize[2])
-            .fill('black')
-            .drawText(titlePosSize[0] - 1, titlePosSize[2] - 1, 'Welcome!')
-            .drawText(titlePosSize[0] + 1, titlePosSize[2] - 1, 'Welcome!')
-            .drawText(titlePosSize[0] - 1, titlePosSize[2] + 1, 'Welcome!')
-            .drawText(titlePosSize[0] + 1, titlePosSize[2] + 1, 'Welcome!')
-            .fill('#d1c300')
-            .drawText(titlePosSize[0], titlePosSize[2], 'Welcome!')
-
-            .font(path.join(__dirname, 'Fonts', 'Arial.ttf'), textPosSize[2])
-            .fill('black')
-            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'To get started, enter "' + userSend + '".')
-            .drawText(textPosSize[0] - 1, textPosSize[1] - 1, 'To get started, enter "' + userSend + '".')
-            .drawText(textPosSize[0] - 1, textPosSize[1] + 1, 'To get started, enter "' + userSend + '".')
-            .drawText(textPosSize[0] + 1, textPosSize[1] + 1, 'To get started, enter "' + userSend + '".')
-            .fill('#d1c300')
-            .drawText(textPosSize[0], textPosSize[1], 'To get started, enter "' + userSend + '".')
 
             .toBuffer('GIF', (err, buffer) => {
                 if (err) {
@@ -209,8 +198,12 @@ async function welcome(url, tenor) {
                     resolve(buffer);
                 }
             });
-        
         });
+
+        const bufferPt1 = await drawTextWithBorder(initialBuffer, 'Welcome!',
+            '#d1c300', 'black', titlePosSize[2], titlePosSize[0], titlePosSize[1]);
+        return await drawTextWithBorder(bufferPt1, 'To get started, enter "' + userSend + '".',
+            '#d1c300', 'black', textPosSize[2], textPosSize[0], textPosSize[1]);
     } catch (err) {
         console.error('Error in hub function:', err);
         throw err;
