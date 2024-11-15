@@ -32,7 +32,7 @@ app.get('*', async (req, res) => {
             tenor = true;
 
             // Fetch the initial HTML
-            const response = await fetch(source, {
+            const response = await fetch(source.replace('tenvietr', 'tenor'), {
                 headers: {
                     'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
                 }
@@ -50,7 +50,7 @@ app.get('*', async (req, res) => {
         } else {
             // Assuming Discord URL
             tenor = false;
-            gifURL = source;
+            gifURL = source.replace('discvietrd', 'discord');
         }
 
         let gifBuffer;
