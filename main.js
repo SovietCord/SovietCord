@@ -88,6 +88,6 @@ app.get('*', async (req, res) => {
     }
 });
 
-app.listen('80', () => {
-    console.log('Listening, port 80');
+app.listen('6969', () => {
+    console.log('Listening, port 6969');
 });
