@@ -3,7 +3,6 @@ const app = express();
 require('dotenv').config();
 const { deepFry, sovietize, hub, welcome } = require('./effects.js');
 const path = require('path');
-const { send } = require('process');
 const fs = require('fs').promises;
 
 async function sendError(res) {
@@ -31,20 +30,25 @@ app.get('*', async (req, res) => {
         if(source.charAt(8) === 't') {
             // Tenor URL
             tenor = true;
-            const response = await fetch(`https://tenor.googleapis.com/v2/search?q=${source.split('/')[4]}&key=${process.env.TENOR_API_KEY}&client_key=sovietcord&limit=1`, {
+
+            // Fetch the initial HTML
+            const response = await fetch(source, {
                 headers: {
                     'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
                 }
             });
-
-            const data = await response.json();
-
-            if (!(data.results && data.results.length > 0)) {
-                // No gifs found
-                return await sendError(res);
+            const html = await response.text();
+    
+            // Extract the URL from the HTML
+            const match = html.match(/<meta class="dynamic" name="twitter:image" content="https:\/\/(?:c|media1)\.tenor\.com\/([^"]*)">/);
+            if (!match || !match[1]) {
+                throw new Error("Image URL not found in the HTML.");
+            } else {
+                console.log("Found!", match[1]);
             }
-
-            gifURL = data.results[0].media_formats.gif.url;
+    
+            // Construct the direct image URL
+            gifURL = `https://media1.tenor.com/${match[1]}`;
         } else {
             // Assuming Discord URL
             tenor = false;
