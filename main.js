@@ -70,14 +70,16 @@ app.get('*', async (req, res) => {
 
         let gifBuffer;
         let skipCheck = false;
+        const URL = (req.params[0]).split('/').slice(0, 2).join('/');
+        
         // Send welcome message if needed
-        if(req.params[0] === '/' || req.params[0] === '/view' || req.params[0] === '/attachments') {
+        if(URL === '/' || URL === '/view' || URL === '/attachments') {
             skipCheck = true;
             gifBuffer = await welcome(gifURL, tenor ? true : false);
         }
 
         if(!skipCheck) {
-            switch(req.params[0].slice(1)) {
+            switch(URL.slice(1)) {
                 case 'sovietize':
                     gifBuffer = await sovietize(gifURL);
                     break;
