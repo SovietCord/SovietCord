@@ -26,7 +26,7 @@ async function sendError(res) {
 app.get('*', async (req, res) => {
     try {
         // Get the source from the headers
-        const source = req.headers['http_source'];
+        const source = req.headers['http-source'];
 
         // Check the header
         if(source === undefined) return sendError(res);
