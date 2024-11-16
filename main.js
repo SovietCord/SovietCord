@@ -5,6 +5,13 @@ const { deepFry, sovietize, hub, welcome } = require('./effects.js');
 const path = require('path');
 const fs = require('fs').promises;
 
+const replace = [
+    'menu',
+    'welcome',
+    'sovietize',
+    'deepfry'
+]
+
 async function sendError(res) {
     try {
         const errorGifBuffer = await fs.readFile(path.join(__dirname, 'media', 'error.gif'));
@@ -31,8 +38,13 @@ app.get('*', async (req, res) => {
             // Tenor URL
             tenor = true;
 
+            let toFetch = source.replace('tenvietr', 'tenor');
+            for(let i = 0; i<replace.length; i++) {
+                toFetch = toFetch.replace(replace[i], 'view');
+            }
+            
             // Fetch the initial HTML
-            const response = await fetch(source.replace('tenvietr', 'tenor'), {
+            const response = await fetch(toFetch, {
                 headers: {
                     'User-Agent': 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)',
                 }
@@ -51,6 +63,9 @@ app.get('*', async (req, res) => {
             // Assuming Discord URL
             tenor = false;
             gifURL = source.replace('discvietrd', 'discord');
+            for(let i = 0; i<replace.length; i++) {
+                gifURL = gifURL.replace(replace[i], 'attachments');
+            }
         }
 
         let gifBuffer;
