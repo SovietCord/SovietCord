@@ -119,8 +119,6 @@ async function hub(url) {
         
         const gif = await getGif(url);
 
-        // i found why it wasn't working and i feel very stupid now
-        // (no you won't look at the last commit to see what was wrong)
         let titlePosSize = [30, 60, 60];
         let textPosSize = [30, 100, 20];
         // Handle if gif is smol

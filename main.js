@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 const { deepFry, sovietize, hub, welcome } = require('./effects.js');
+const { compressGIF } = require('./optimize.js');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -94,6 +95,8 @@ app.get('*', async (req, res) => {
             }
         }
 
+        // Compress the GIF
+        gifBuffer = await compressGIF(gifBuffer, 3, 60);
         // Send the output
         res.setHeader('User-Agent', 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)');
         res.setHeader('Content-Type', 'image/gif');

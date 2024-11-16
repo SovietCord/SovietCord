@@ -16,5 +16,9 @@ You can then run it with:
 ```sh
 npm start
 ```
+If you want to use `start.sh`, give it the correct permissions with:
+```sh
+chmod +x ./start.sh
+```
 > [!NOTE]
-> You will need to have `imagemagick` installed on your system for the `gm` library, used by Sovietcord to modify the GIF files
+> You will need to have `imagemagick` (for `gm`) and `gifsicle` installed on your system
