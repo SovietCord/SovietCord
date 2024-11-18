@@ -1,5 +1,6 @@
 require('dotenv').config();
 const gm = require('gm').subClass({ imageMagick: true });
+const { get } = require('http');
 const path = require('path');
 
 // Some functions to simplify the code and avoid repetitions
@@ -115,7 +116,8 @@ async function hub(url) {
     try {
         // Here are the available commands
         const commands = 's/menu/deepfry\n'
-        + 's/menu/sovietize\n\n'
+        + 's/menu/sovietize\n'
+        + 's/menu/weirdy\n'
         
         const gif = await getGif(url);
 
@@ -210,4 +212,4 @@ async function welcome(url, tenor) {
 
 
 
-module.exports = { deepFry, sovietize, hub, welcome };
+module.exports = { deepFry, sovietize, hub, welcome, drawSmallText, getGif };
