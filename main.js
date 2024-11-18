@@ -10,7 +10,8 @@ const replace = [
     'menu',
     'welcome',
     'sovietize',
-    'deepfry'
+    'deepfry',
+    'weirdy'
 ]
 
 async function sendError(res) {
