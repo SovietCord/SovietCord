@@ -105,6 +105,7 @@ app.get('*', async (req, res) => {
             gifBuffer = await welcome(gifURL, tenor ? true : false);
         }
 
+        let weirdy = false;
         if(!skipCheck) {
             switch(URL.slice(1)) {
                 case 'sovietize':
@@ -119,8 +120,7 @@ app.get('*', async (req, res) => {
                 case 'weirdy':
                     // This effect works by overcompressing the GIF
                     gifBuffer = await getGif(gifURL);
-                    gifBuffer = await compressGIF(gifBuffer, 3, 50000);
-                    gifBuffer = await drawSmallText(gifBuffer, 'Enter "s/weirdy/menu" to go back to the hub');
+                    weirdy = true;
                     break;
                 default:
                     gifBuffer = await fs.readFile(path.join(__dirname, 'media', 'error.gif'));
@@ -128,7 +128,8 @@ app.get('*', async (req, res) => {
         }
 
         // Compress & send the GIF
-        gifBuffer = await compressGIF(gifBuffer, 3, 60);
+        gifBuffer = await compressGIF(gifBuffer, 3, (weirdy ? 50000 : 60));
+        if(weirdy) gifBuffer = await drawSmallText(gifBuffer, 'Enter "s/weirdy/menu" to go back to the hub');
         res.setHeader('User-Agent', 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)');
         res.setHeader('Content-Type', 'image/gif');
         res.send(gifBuffer);
