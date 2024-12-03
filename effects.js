@@ -40,7 +40,7 @@ async function drawTextWithBorder(buffer, text, textColor, borderColor, size, x,
             if(err) reject(err);
             else resolve(buffer);
         });
-    });
+    });Z
 }
 
 // Takes in the URL of the GIF, writes it to a temporary file, 
@@ -212,4 +212,4 @@ async function welcome(url, tenor) {
 
 
 
-module.exports = { deepFry, sovietize, hub, welcome, drawSmallText, getGif };
+module.exports = { deepFry, sovietize, hub, welcome, drawSmallText, drawTextWithBorder, getGif };

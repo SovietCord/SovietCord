@@ -17,12 +17,22 @@ async function compressGIF(gifBuffer, optimization, loss) {
             output = Buffer.concat([output, chunk]);
         });
 
-        gifsicle.on('close', (code) => {
-            if (code === 0) resolve(output);
-            else reject(new Error('Gifsicle process failed.'));
+        gifsicle.stderr.on('data', (data) => {
+            console.error('Gifsicle stderr:', data.toString());
         });
 
-        gifsicle.on('error', (err) => reject(err));
+        gifsicle.on('close', (code) => {
+            if (code === 0) {
+                resolve(output);
+            } else {
+                reject(new Error(`Gifsicle process failed with code ${code}.`));
+            }
+        });
+
+        gifsicle.on('error', (err) => {
+            console.error('Gifsicle error:', err);
+            reject(err);
+        });
     });
 }
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 require('dotenv').config();
-const { deepFry, sovietize, hub, welcome, drawSmallText, getGif } = require('./effects.js');
+const { deepFry, sovietize, hub, welcome, drawSmallText, drawTextWithBorder, getGif } = require('./effects.js');
 const { compressGIF } = require('./optimize.js');
 const path = require('path');
 const fs = require('fs').promises;
@@ -14,9 +14,12 @@ const replace = [
     'weirdy'
 ]
 
-async function sendError(res) {
+async function sendError(res, errorMsg='An error occurred') {
+    console.log('Error:', errorMsg);
     try {
-        const errorGifBuffer = await fs.readFile(path.join(__dirname, 'media', 'error.gif'));
+        let errorGifBuffer = await fs.readFile(path.join(__dirname, 'media', 'error.gif'));
+        errorGifBuffer = await drawTextWithBorder(errorGifBuffer, ('Error: ' + errorMsg), 'white', 'black', 30, 10, 30);
+
         res.setHeader('Content-Type', 'image/gif');
         res.send(errorGifBuffer);
     } catch(error) {
@@ -93,6 +96,9 @@ app.get('*', async (req, res) => {
             for(let i = 0; i<replace.length; i++) {
                 gifURL = gifURL.replace(replace[i], 'attachments');
             }
+
+            // Know if the required options are here
+            if(gifURL.split('?').length < 2) return await sendError(res, 'Missing options');
         }
 
         let gifBuffer;
@@ -128,6 +134,7 @@ app.get('*', async (req, res) => {
         }
 
         // Compress & send the GIF
+        if(weirdy) gifBuffer = await drawSmallText(gifBuffer, 'Enter "s/weirdy/menu" to go back to the hub');
         gifBuffer = await compressGIF(gifBuffer, 3, (weirdy ? 50000 : 60));
         if(weirdy) gifBuffer = await drawSmallText(gifBuffer, 'Enter "s/weirdy/menu" to go back to the hub');
         res.setHeader('User-Agent', 'SovietCord/1.0 (Debian12; x64) PrivateKit/420.69 (KHTML, like Gecko)');
@@ -136,7 +143,7 @@ app.get('*', async (req, res) => {
     } catch (error) {
         // Error
         console.error('Error in processing:\n', error);
-        sendError(res);
+        sendError(res, 'Processing error');
     }
 });
 
