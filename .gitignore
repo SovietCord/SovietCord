@@ -1,2 +1,5 @@
 .env
 node_modules
+# Technically useless but we never know
+cdn/package.json
+cdn/node_modules/

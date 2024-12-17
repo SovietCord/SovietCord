@@ -97,6 +97,8 @@ app.get('*', async (req, res) => {
                 gifURL = gifURL.replace(replace[i], 'attachments');
             }
 
+            // Make it work with the CDN proxy
+            gifURL = 'http://localhost:8090/?' + gifURL;
             // Know if the required options are here
             if(gifURL.split('?').length < 2) return await sendError(res, 'Missing options');
         }
